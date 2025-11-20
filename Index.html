@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<!-- saved from url=(0039)https://calculator.prospectingwiki.org/ -->
+<html data-theme="dark" lang="en"><head><meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Prospecting Drop Calculator — Final version: Updated 15/11/25</title>
+<style>
+  :root { --bg:#ffffff; --fg:#0e1013; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb; --table-stripe:#f8fafc; --pill:#f3f4f6; --best:#fff7e6; --accent:#111827; --shadow:0 8px 20px rgba(2,6,23,0.08); }
+  [data-theme="dark"] { --bg:#0b0f17; --fg:#e5e7eb; --muted:#9aa0a6; --card:#0f1623; --border:#223048; --table-stripe:#111b2b; --pill:#1b2436; --best:#18240f; --accent:#e5e7eb; --shadow:0 8px 24px rgba(0,0,0,0.35); }
+  * { box-sizing:border-box; }
+  html,body{height:100%}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--fg);font-size:17px;line-height:1.45}
+  .wrap{max-width:1100px;margin:22px auto 80px;padding:56px 16px 0}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  h1{font-size:1.7rem;margin:0;letter-spacing:.2px}
+  .muted{color:var(--muted);font-size:.98rem}
+  .card{border:1px solid var(--border);border-radius:16px;padding:18px;margin-top:16px;background:var(--card);box-shadow:var(--shadow)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  label{font-weight:700;display:block;margin-bottom:8px}
+  input,button,select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:1.05rem;background:var(--bg);color:var(--fg)}
+  input:focus,button:focus,select:focus{outline:3px solid rgba(99,102,241,.25);outline-offset:2px}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:1rem}
+  th,td{text-align:left;padding:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+  thead th{position:sticky;top:0;background:var(--card);font-size:1.0rem;z-index:1}
+  tbody tr:hover td{background:var(--table-stripe)}
+  .right{text-align:right}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+  .pill{display:inline-block;padding:8px 12px;border-radius:999px;background:var(--pill);margin-right:10px;font-size:.95rem;font-weight:700}
+  .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .mineralName{font-weight:800;font-size:1.15rem}
+  .best{background:var(--best)!important}
+  .borderLeft{border-left:6px solid transparent}
+  .theme-toggle{position:fixed;top:16px;right:16px;z-index:9999;background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:999px;padding:10px 14px;font-size:1rem;cursor:pointer;box-shadow:var(--shadow)}
+  .controls-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .full-row{margin-bottom:8px}
+  @media(max-width:1000px){.row{grid-template-columns:1fr}.controls-grid{grid-template-columns:1fr}}
+  .select{position:relative;min-width:300px}
+  .select-btn{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--fg);cursor:pointer;box-shadow:var(--shadow)}
+  .select-btn .label{display:flex;align-items:center;gap:10px;font-weight:700}
+  .dot{width:10px;height:10px;border-radius:999px;display:inline-block;border:1px solid var(--border)}
+  .select-list{position:absolute;left:0;right:0;top:calc(100% + 8px);background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);max-height:320px;overflow:auto;padding:6px;display:none;z-index:10}
+  .select.open .select-list{display:block}
+  .option{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;cursor:pointer;font-weight:600}
+  .option:hover,.option.active{background:var(--table-stripe)}
+  .option .opt-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gradient-text{background:linear-gradient(90deg,red,orange,yellow,green,blue,indigo,violet);-webkit-background-clip:text;background-clip:text;color:transparent}
+</style>
+</head>
+<body>
+<button class="theme-toggle" id="themeBtn">Theme: <span id="themeLabel">Dark</span></button>
+<div class="wrap">
+<header>
+<div>
+<h1>Prospecting Drop Calculator — Final version: Updated 15/11/25</h1>
+<div class="muted">Enter your <strong>Luck</strong> and <strong>Capacity</strong>. Pick a mineral. Multiple rolls per attempt are accounted for by your stats.</div>
+</div>
+</header>
+<div class="card">
+<div class="row">
+<div>
+<label for="luck">Luck</label>
+<input id="luck" min="0" step="any" type="number" value="10"/>
+</div>
+<div>
+<label for="capacity">Capacity</label>
+<input id="capacity" min="0" step="any" type="number" value="25"/>
+</div>
+</div>
+<div class="head" style="margin-top:10px; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+<div>
+<div class="pill" id="pulls" style="font-size:1.05rem;font-weight:700;">Rolls per attempt: 32.5</div>
+<div class="muted" id="statsSummary">Luck: 10 · Capacity: 25</div>
+</div>
+<div class="pill" id="bestBadge">Best location: Frozen Peak (0.0084%)</div>
+</div>
+</div>
+<div class="card">
+<div class="full-row">
+<label for="search">Search mineral</label>
+<input id="search" placeholder="Type part of the name..." type="text"/>
+</div>
+<div class="controls-grid">
+<div>
+<label for="rarityFilter">Filter by rarity</label>
+<select id="rarityFilter">
+<option value="">(all)</option>
+<option style="color: rgb(154, 160, 166);" value="comun">Common</option>
+<option style="color: rgb(52, 168, 83);" value="poco_comun">Uncommon</option>
+<option style="color: rgb(66, 133, 244);" value="raro">Rare</option>
+<option style="color: rgb(161, 66, 244);" value="epico">Epic</option>
+<option style="color: rgb(251, 188, 4);" value="legendario">Legendary</option>
+<option style="color: rgb(255, 0, 255);" value="mitico">Mythic</option>
+<option style="color: rgb(234, 67, 53);" value="exotico">Exotic</option>
+</select>
+</div>
+<div class="select" id="selectWrap">
+<label style="font-weight:700; margin-bottom:8px; display:block;">Select mineral</label>
+<div aria-expanded="false" aria-haspopup="listbox" class="select-btn" id="selectBtn">
+<div class="label"><span class="dot" id="selDot" style="background: rgb(251, 188, 4);"></span><span id="selText">Aetherite</span></div>
+<div>▾</div>
+</div>
+<div aria-activedescendant="" class="select-list" id="selectList" role="listbox" tabindex="-1"><div class="option" data-idx="0" id="opt-0" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Aetherite</span></div><div class="option" data-idx="1" id="opt-1" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Amber</span></div><div class="option" data-idx="2" id="opt-2" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Amethyst</span></div><div class="option" data-idx="3" id="opt-3" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Ammonite Fossil</span></div><div class="option" data-idx="4" id="opt-4" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Aquamarine</span></div><div class="option" data-idx="5" id="opt-5" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Ashvein</span></div><div class="option" data-idx="6" id="opt-6" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Aurorite</span></div><div class="option" data-idx="7" id="opt-7" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Azuralite</span></div><div class="option" data-idx="8" id="opt-8" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Blue Ice</span></div><div class="option" data-idx="9" id="opt-9" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Borealite</span></div><div class="option" data-idx="10" id="opt-10" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Catseye</span></div><div class="option" data-idx="11" id="opt-11" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Chrysoberyl</span></div><div class="option" data-idx="12" id="opt-12" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Cinnabar</span></div><div class="option" data-idx="13" id="opt-13" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Cobalt</span></div><div class="option" data-idx="14" id="opt-14" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Copper</span></div><div class="option" data-idx="15" id="opt-15" role="option"><span class="dot" style="background: rgb(52, 168, 83);"></span><span class="opt-text">Coral</span></div><div class="option" data-idx="16" id="opt-16" role="option"><span class="dot" style="background: rgb(234, 67, 53);"></span><span class="opt-text">Cryonic Artifact</span></div><div class="option" data-idx="17" id="opt-17" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Diamond</span></div><div class="option" data-idx="18" id="opt-18" role="option"><span class="dot" style="background: rgb(234, 67, 53);"></span><span class="opt-text">Dinosaur Skull</span></div><div class="option" data-idx="19" id="opt-19" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Dragon Bone</span></div><div class="option" data-idx="20" id="opt-20" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Emerald</span></div><div class="option" data-idx="21" id="opt-21" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Fire Opal</span></div><div class="option" data-idx="22" id="opt-22" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Firefly Stone</span></div><div class="option" data-idx="23" id="opt-23" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Flarebloom</span></div><div class="option" data-idx="24" id="opt-24" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Frostshard</span></div><div class="option" data-idx="25" id="opt-25" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Glacial Quartz</span></div><div class="option" data-idx="26" id="opt-26" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Gloomberry</span></div><div class="option" data-idx="27" id="opt-27" role="option"><span class="dot" style="background: rgb(52, 168, 83);"></span><span class="opt-text">Glowberry</span></div><div class="option" data-idx="28" id="opt-28" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Glowmoss</span></div><div class="option" data-idx="29" id="opt-29" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Gold</span></div><div class="option" data-idx="30" id="opt-30" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Golden Pearl</span></div><div class="option" data-idx="31" id="opt-31" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Inferlume</span></div><div class="option" data-idx="32" id="opt-32" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Iridium</span></div><div class="option" data-idx="33" id="opt-33" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Jade</span></div><div class="option" data-idx="34" id="opt-34" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Lapis Lazuli</span></div><div class="option" data-idx="35" id="opt-35" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Lightshard</span></div><div class="option" data-idx="36" id="opt-36" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Luminum</span></div><div class="option" data-idx="37" id="opt-37" role="option"><span class="dot" style="background: rgb(52, 168, 83);"></span><span class="opt-text">Malachite</span></div><div class="option" data-idx="38" id="opt-38" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Meteoric Iron</span></div><div class="option" data-idx="39" id="opt-39" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Mythril</span></div><div class="option" data-idx="40" id="opt-40" role="option"><span class="dot" style="background: rgb(52, 168, 83);"></span><span class="opt-text">Neodymium</span></div><div class="option" data-idx="41" id="opt-41" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Obsidian</span></div><div class="option" data-idx="42" id="opt-42" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Onyx</span></div><div class="option" data-idx="43" id="opt-43" role="option"><span class="dot" style="background: rgb(161, 66, 244);"></span><span class="opt-text">Osmium</span></div><div class="option" data-idx="44" id="opt-44" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Painite</span></div><div class="option" data-idx="45" id="opt-45" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Palladium</span></div><div class="option" data-idx="46" id="opt-46" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Pearl</span></div><div class="option" data-idx="47" id="opt-47" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Peridot</span></div><div class="option" data-idx="48" id="opt-48" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Pink Diamond</span></div><div class="option" data-idx="49" id="opt-49" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Platinum</span></div><div class="option" data-idx="50" id="opt-50" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Prismara</span></div><div class="option" data-idx="51" id="opt-51" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Pyrelith</span></div><div class="option" data-idx="52" id="opt-52" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Pyrite</span></div><div class="option" data-idx="53" id="opt-53" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Radiant Gold</span></div><div class="option" data-idx="54" id="opt-54" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Rose Gold</span></div><div class="option" data-idx="55" id="opt-55" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Ruby</span></div><div class="option" data-idx="56" id="opt-56" role="option"><span class="dot" style="background: rgb(52, 168, 83);"></span><span class="opt-text">Sapphire</span></div><div class="option" data-idx="57" id="opt-57" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Seashell</span></div><div class="option" data-idx="58" id="opt-58" role="option"><span class="dot" style="background: rgb(154, 160, 166);"></span><span class="opt-text">Silver</span></div><div class="option" data-idx="59" id="opt-59" role="option"><span class="dot" style="background: rgb(66, 133, 244);"></span><span class="opt-text">Silver Clamshell</span></div><div class="option" data-idx="60" id="opt-60" role="option"><span class="dot" style="background: rgb(52, 168, 83);"></span><span class="opt-text">Smoky Quartz</span></div><div class="option" data-idx="61" id="opt-61" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Specterite</span></div><div class="option" data-idx="62" id="opt-62" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Starshine</span></div><div class="option" data-idx="63" id="opt-63" role="option"><span class="dot" style="background: rgb(52, 168, 83);"></span><span class="opt-text">Titanium</span></div><div class="option" data-idx="64" id="opt-64" role="option"><span class="dot" style="background: rgb(52, 168, 83);"></span><span class="opt-text">Topaz</span></div><div class="option" data-idx="65" id="opt-65" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Tourmaline</span></div><div class="option" data-idx="66" id="opt-66" role="option"><span class="dot" style="background: rgb(234, 67, 53);"></span><span class="opt-text">Umbrite</span></div><div class="option" data-idx="67" id="opt-67" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Uranium</span></div><div class="option" data-idx="68" id="opt-68" role="option"><span class="dot" style="background: rgb(234, 67, 53);"></span><span class="opt-text">Vineheart</span></div><div class="option" data-idx="69" id="opt-69" role="option"><span class="dot" style="background: rgb(234, 67, 53);"></span><span class="opt-text">Voidstone</span></div><div class="option" data-idx="70" id="opt-70" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Volcanic Core</span></div><div class="option" data-idx="71" id="opt-71" role="option"><span class="dot" style="background: rgb(251, 188, 4);"></span><span class="opt-text">Volcanic Key</span></div><div class="option" data-idx="72" id="opt-72" role="option"><span class="dot" style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);"></span><span class="opt-text gradient-text">Vortessence</span></div><div class="option" data-idx="73" id="opt-73" role="option"><span class="dot" style="background: rgb(52, 168, 83);"></span><span class="opt-text">Zircon</span></div></div>
+</div>
+<div>
+<label for="locationFilter">Filter by location</label>
+<select id="locationFilter">
+<option value="">(all)</option>
+<option value="Fungal Marsh">Fungal Marsh</option>
+<option value="Rotwood Swamp">Rotwood Swamp</option>
+<option value="Haunted Creek">Haunted Creek</option>
+<option style="color: rgb(75, 0, 130);" value="Abyssal Depths">Abyssal Depths</option>
+<option style="color: rgb(26, 167, 255);" value="Azuralite Oasis">Azuralite Oasis</option>
+<option style="color: rgb(46, 125, 247);" value="Crystal Cavern River">Crystal Cavern River</option>
+<option style="color: rgb(26, 167, 255);" value="Crystal Caverns">Crystal Caverns</option>
+<option style="color: rgb(183, 202, 0);" value="Deeproot Spring">Deeproot Spring</option>
+<option style="color: rgb(241, 194, 50);" value="Fortune River">Fortune River</option>
+<option style="color: rgb(0, 188, 212);" value="Fortune River Delta">Fortune River Delta</option>
+<option style="color: rgb(86, 168, 255);" value="Frostbite River">Frostbite River</option>
+<option style="color: rgb(32, 196, 230);" value="Frostbite Waterfall">Frostbite Waterfall</option>
+<option style="color: rgb(106, 60, 255);" value="Frozen Peak">Frozen Peak</option>
+<option style="color: rgb(163, 23, 23);" value="Infernal Heart">Infernal Heart</option>
+<option style="color: rgb(29, 177, 74);" value="Overgrown Grotto">Overgrown Grotto</option>
+<option style="color: rgb(155, 123, 95);" value="Rubble Creek Deposits">Rubble Creek Deposits</option>
+<option style="color: rgb(202, 160, 98);" value="Rubble Creek Sands">Rubble Creek Sands</option>
+<option style="color: rgb(243, 156, 18);" value="Sunset Beach">Sunset Beach</option>
+<option style="color: rgb(211, 47, 47);" value="The Magma Furnace">The Magma Furnace</option>
+<option style="color: rgb(191, 191, 191);" value="The Void">The Void</option>
+<option style="color: rgb(255, 122, 0);" value="Volcanic Sands">Volcanic Sands</option>
+<option style="color: rgb(235, 125, 52);" value="Windswept Beach">Windswept Beach</option>
+</select>
+</div>
+</div>
+<div class="head" style="margin-top:10px; justify-content:space-between;">
+<div>
+        Mineral: <span class="mineralName" id="mineralName">Aetherite</span>
+<span class="pill" id="rarityBadge" style="background: rgb(251, 188, 4); color: rgb(17, 17, 17);">Legendary</span>
+</div>
+<button class="pill" id="advChip" style="cursor:pointer;">Advanced</button><span class="muted" id="advHint" style="margin-left:8px;">Normal: showing ~1 in X (click for %)</span>
+</div>
+<div style="margin-top:6px;">
+<span class="pill" id="rarityBadge">—</span>
+</div>
+</div>
+<div class="card">
+<table id="tbl">
+<thead>
+<tr>
+<th>Location</th>
+<th class="right">Base chance (per roll)</th>
+<th class="right">Chance per attempt</th>
+<th class="right">Attempts for 50% drop</th>
+<th class="right">Attempts for 90% drop</th>
+</tr>
+</thead>
+<tbody id="tbody"><tr class="best borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(106, 60, 255);">Frozen Peak</td><td class="right mono">0.00025760%</td><td class="right mono">0.0084%</td><td class="right mono">8279.34</td><td class="right mono">27503.37</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(32, 196, 230);">Frostbite Waterfall</td><td class="right mono">0.00025740%</td><td class="right mono">0.0084%</td><td class="right mono">8285.77</td><td class="right mono">27524.74</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(75, 0, 130);">Abyssal Depths</td><td class="right mono">0.00024235%</td><td class="right mono">0.0079%</td><td class="right mono">8800.32</td><td class="right mono">29234.04</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(29, 177, 74);">Overgrown Grotto</td><td class="right mono">0.00023300%</td><td class="right mono">0.0076%</td><td class="right mono">9153.47</td><td class="right mono">30407.16</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(183, 202, 0);">Deeproot Spring</td><td class="right mono">0.00023000%</td><td class="right mono">0.0075%</td><td class="right mono">9272.86</td><td class="right mono">30803.78</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(0, 188, 212);">Fortune River Delta</td><td class="right mono">0.00013679%</td><td class="right mono">0.0044%</td><td class="right mono">15591.48</td><td class="right mono">51793.79</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(46, 125, 247);">Crystal Cavern River</td><td class="right mono">0.00012694%</td><td class="right mono">0.0041%</td><td class="right mono">16801.32</td><td class="right mono">55812.77</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(26, 167, 255);">Azuralite Oasis</td><td class="right mono">0.00011556%</td><td class="right mono">0.0038%</td><td class="right mono">18455.86</td><td class="right mono">61309.04</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(243, 156, 18);">Sunset Beach</td><td class="right mono">0.00011333%</td><td class="right mono">0.0037%</td><td class="right mono">18819.02</td><td class="right mono">62515.43</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(155, 123, 95);">Rubble Creek Deposits</td><td class="right mono">0.00009266%</td><td class="right mono">0.0030%</td><td class="right mono">23017.05</td><td class="right mono">76460.97</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(202, 160, 98);">Rubble Creek Sands</td><td class="right mono">0.00008779%</td><td class="right mono">0.0029%</td><td class="right mono">24293.88</td><td class="right mono">80702.52</td></tr><tr class="borderLeft" style="border-left-color: rgb(251, 188, 4);"><td style="color: rgb(241, 194, 50);">Fortune River</td><td class="right mono">0.00005739%</td><td class="right mono">0.0019%</td><td class="right mono">37162.57</td><td class="right mono">123451.39</td></tr></tbody>
+</table>
+</div>
+</div>
+<!-- Fallback embedded data (used only if wiki fetch fails).
+     Includes fixes: Gloomberry, Umbrite, Uranium key, Abyssal Depths present. -->
+<script id="data" type="application/json">{"minerals":[{"mineral":"Aetherite","locations":[{"location":"Abyssal Depths","chance_percent":0.00024235},{"location":"Azuralite Oasis","chance_percent":0.00011556},{"location":"Crystal Cavern River","chance_percent":0.00012694},{"location":"Deeproot Spring","chance_percent":0.00023},{"location":"Fortune River","chance_percent":5.739e-05},{"location":"Fortune River Delta","chance_percent":0.00013679},{"location":"Frostbite Waterfall","chance_percent":0.0002574},{"location":"Frozen Peak","chance_percent":0.0002576},{"location":"Haunted Creek","chance_percent":0.00013},{"location":"Overgrown Grotto","chance_percent":0.000233},{"location":"Rubble Creek Deposits","chance_percent":9.266e-05},{"location":"Rubble Creek Sands","chance_percent":8.779e-05},{"location":"Sunset Beach","chance_percent":0.00011333}],"rarity":"legendario"},{"mineral":"Amber","locations":[{"location":"Abyssal Depths","chance_percent":0.04846935962},{"location":"Deeproot Spring","chance_percent":0.0452}],"rarity":"raro"},{"mineral":"Amethyst","locations":[{"location":"Azuralite Oasis","chance_percent":4.62233721},{"location":"Crystal Cavern River","chance_percent":4.23118283},{"location":"Rubble Creek Sands","chance_percent":4.38941985}],"rarity":"comun"},{"mineral":"Ammonite Fossil","locations":[{"location":"Windswept Beach","chance_percent":0.00602698}],"rarity":"epico"},{"mineral":"Aquamarine","locations":[{"location":"Frostbite River","chance_percent":0.0001286},{"location":"Frostbite Waterfall","chance_percent":0.0001288},{"location":"Frozen Peak","chance_percent":2.5749e-05}],"rarity":"legendario"},{"mineral":"Ashvein","locations":[{"location":"Azuralite Oasis","chance_percent":0.00924467},{"location":"Crystal Cavern River","chance_percent":0.00846237},{"location":"Sunset Beach","chance_percent":0.01133294}],"rarity":"epico"},{"mineral":"Astral Spore","locations":[{"location":"Fungal Marsh","chance_percent":4.3398e-08}],"rarity":"exotico"},{"mineral":"Aurorite","locations":[{"location":"Abyssal Depths","chance_percent":0.001454},{"location":"Deeproot Spring","chance_percent":0.0014},{"location":"Fortune River","chance_percent":0.00860909},{"location":"Fortune River Delta","chance_percent":0.0054716},{"location":"Frostbite Waterfall","chance_percent":0.001931},{"location":"Frozen Peak","chance_percent":0.002575},{"location":"Haunted Creek","chance_percent":0.0022},{"location":"Overgrown Grotto","chance_percent":0.002334},{"location":"Rubble Creek Deposits","chance_percent":0.00926614},{"location":"Rubble Creek Sands","chance_percent":0.0052673}],"rarity":"epico"},{"mineral":"Azuralite","locations":[{"location":"Abyssal Depths","chance_percent":0.4846935962},{"location":"Azuralite Oasis","chance_percent":0.46223372},{"location":"Crystal Cavern River","chance_percent":0.42311828},{"location":"Deeproot Spring","chance_percent":0.4518},{"location":"Overgrown Grotto","chance_percent":0.466733}],"rarity":"raro"},{"mineral":"Bismuth","locations":[{"location":"Fungal Marsh","chance_percent":0.0001627},{"location":"Rotwood Swamp","chance_percent":0.00016274},{"location":"The Void (if in loot pool)","chance_percent":0.0001811}],"rarity":"legendario"},{"mineral":"Blue Ice","locations":[{"location":"Frostbite River","chance_percent":51.496067},{"location":"Frostbite Waterfall","chance_percent":51.496059},{"location":"Frozen Peak","chance_percent":51.496949}],"rarity":"comun"},{"mineral":"Bone","locations":[{"location":"Fungal Marsh","chance_percent":0.01085},{"location":"Haunted Creek","chance_percent":0.0086},{"location":"Rotwood Swamp","chance_percent":0.0108},{"location":"The Void (if in loot pool)","chance_percent":0.003623}],"rarity":"epico"},{"mineral":"Borealite","locations":[{"location":"Azuralite Oasis","chance_percent":0.00462234},{"location":"Crystal Cavern River","chance_percent":0.00423118},{"location":"Frostbite River","chance_percent":0.00515},{"location":"Frostbite Waterfall","chance_percent":0.00515},{"location":"Frozen Peak","chance_percent":0.00515}],"rarity":"epico"},{"mineral":"Catseye","locations":[{"location":"Fortune River","chance_percent":0.00011479},{"location":"Rubble Creek Deposits","chance_percent":0.00012355},{"location":"The Magma Furnace","chance_percent":0.00028455},{"location":"Volcanic Sands","chance_percent":0.00027884},{"location":"Windswept Beach","chance_percent":0.00030135}],"rarity":"legendario"},{"mineral":"Chrysoberyl","locations":[{"location":"Rotwood Swamp","chance_percent":2.1e-06},{"location":"Deeproot Spring","chance_percent":1.8e-06},{"location":"Overgrown Grotto","chance_percent":1e-06},{"location":"The Void (if in loot pool)","chance_percent":2.536e-06}],"rarity":"mitico"},{"mineral":"Cinnabar","locations":[{"location":"Infernal Heart","chance_percent":0.0002211},{"location":"The Magma Furnace","chance_percent":0.00011382},{"location":"Volcanic Sands","chance_percent":0.00011154}],"rarity":"legendario"},{"mineral":"Cobalt","locations":[{"location":"Abyssal Depths","chance_percent":0.0019388},{"location":"Deeproot Spring","chance_percent":0.0181},{"location":"Frostbite River","chance_percent":0.002575},{"location":"Frostbite Waterfall","chance_percent":0.002575},{"location":"Frozen Peak","chance_percent":0.002575},{"location":"Fungal Marsh","chance_percent":0.0021699},{"location":"Haunted Creek","chance_percent":0.0017},{"location":"Overgrown Grotto","chance_percent":0.018669},{"location":"Rotwood Swamp","chance_percent":0.0021},{"location":"The Void (if in loot pool)","chance_percent":0.003623}],"rarity":"epico"},{"mineral":"Copper","locations":[{"location":"Abyssal Depths","chance_percent":24.23467981},{"location":"Azuralite Oasis","chance_percent":36.97869766},{"location":"Crystal Cavern River","chance_percent":33.84946261},{"location":"Deeproot Spring","chance_percent":22.5883},{"location":"Fungal Marsh","chance_percent":27.1237},{"location":"Haunted Creek","chance_percent":21.62},{"location":"Infernal Heart","chance_percent":22.10466356},{"location":"Overgrown Grotto","chance_percent":23.33665},{"location":"The Magma Furnace","chance_percent":17.07292935},{"location":"Volcanic Sands","chance_percent":16.73064195},{"location":"Rotwood Swamp","chance_percent":27.1236},{"location":"The Void (if in loot pool)","chance_percent":18.1132}],"rarity":"comun"},{"mineral":"Coral","locations":[{"location":"Fortune River Delta","chance_percent":3.28295772},{"location":"Sunset Beach","chance_percent":5.66646859},{"location":"Windswept Beach","chance_percent":6.02698171}],"rarity":"poco_comun"},{"mineral":"Cryonic Artifact","locations":[{"location":"Frozen Peak","chance_percent":6.44e-07}],"rarity":"exotico"},{"mineral":"Diamond","locations":[{"location":"Fortune River","chance_percent":0.00022958},{"location":"Fortune River Delta","chance_percent":0.00054716},{"location":"Frostbite River","chance_percent":0.0005145},{"location":"Frostbite Waterfall","chance_percent":0.0005148},{"location":"Frozen Peak","chance_percent":0.0005152},{"location":"Fungal Marsh","chance_percent":0.0005425},{"location":"Rubble Creek Deposits","chance_percent":0.0002471},{"location":"Rubble Creek Sands","chance_percent":0.00013168},{"location":"Sunset Beach","chance_percent":0.00056665},{"location":"Rotwood Swamp","chance_percent":0.000542473},{"location":"Haunted Creek","chance_percent":0.00043},{"location":"The Void (if in loot pool)","chance_percent":0.0001811}],"rarity":"legendario"},{"mineral":"Dinosaur Skull","locations":[{"location":"Infernal Heart","chance_percent":3.684e-06}],"rarity":"exotico"},{"mineral":"Diopside","locations":[{"location":"Fungal Marsh","chance_percent":0.0542},{"location":"Rotwood Swamp","chance_percent":0.0542},{"location":"The Void (if in loot pool)","chance_percent":0.09057}],"rarity":"raro"},{"mineral":"Dragon Bone","locations":[{"location":"Infernal Heart","chance_percent":0.00147364},{"location":"The Magma Furnace","chance_percent":0.00085365},{"location":"Windswept Beach","chance_percent":0.00090405}],"rarity":"legendario"},{"mineral":"Electrum","locations":[{"location":"Fungal Marsh","chance_percent":2.7124},{"location":"Rotwood Swamp","chance_percent":2.7123},{"location":"The Void (if in loot pool)","chance_percent":1.8113}],"rarity":"poco_comun"},{"mineral":"Emerald","locations":[{"location":"Abyssal Depths","chance_percent":0.002908161577},{"location":"Azuralite Oasis","chance_percent":0.0027734},{"location":"Crystal Cavern River","chance_percent":0.00253871},{"location":"Deeproot Spring","chance_percent":0.0027},{"location":"Fortune River","chance_percent":0.00459151},{"location":"Frostbite River","chance_percent":0.001931},{"location":"Fungal Marsh","chance_percent":0.00434},{"location":"Haunted Creek","chance_percent":0.0035},{"location":"Overgrown Grotto","chance_percent":0.0028},{"location":"Rubble Creek Deposits","chance_percent":0.00494194},{"location":"Rubble Creek Sands","chance_percent":0.00219471},{"location":"Rotwood Swamp","chance_percent":0.00433},{"location":"The Void (if in loot pool)","chance_percent":0.003623}],"rarity":"epico"},{"mineral":"Fire Opal","locations":[{"location":"Infernal Heart","chance_percent":0.00029473},{"location":"The Magma Furnace","chance_percent":0.00014227},{"location":"Volcanic Sands","chance_percent":0.00013942}],"rarity":"legendario"},{"mineral":"Firefly Stone","locations":[{"location":"Deeproot Spring","chance_percent":5e-05},{"location":"Overgrown Grotto","chance_percent":4.7e-05}],"rarity":"legendario"},{"mineral":"Flarebloom","locations":[{"location":"Infernal Heart","chance_percent":1.105e-05},{"location":"The Magma Furnace","chance_percent":8.54e-06},{"location":"Volcanic Sands","chance_percent":2.79e-06}],"rarity":"mitico"},{"mineral":"Frostshard","locations":[{"location":"Frostbite Waterfall","chance_percent":3.219e-06},{"location":"Frozen Peak","chance_percent":2.189e-06}],"rarity":"mitico"},{"mineral":"Glacial Quartz","locations":[{"location":"Frostbite River","chance_percent":0.12874},{"location":"Frostbite Waterfall","chance_percent":0.12874},{"location":"Frozen Peak","chance_percent":0.128742}],"rarity":"raro"},{"mineral":"Gloomberry","locations":[{"location":"Abyssal Depths","chance_percent":0.0004846935962}],"rarity":"raro"},{"mineral":"Gloomcap","locations":[{"location":"Fungal Marsh","chance_percent":0.0002712}],"rarity":"legendario"},{"mineral":"Glowberry","locations":[{"location":"Deeproot Spring","chance_percent":1.3553},{"location":"Overgrown Grotto","chance_percent":1.400199}],"rarity":"poco_comun"},{"mineral":"Glowmoss","locations":[{"location":"Deeproot Spring","chance_percent":0.00045},{"location":"Overgrown Grotto","chance_percent":0.000467}],"rarity":"epico"},{"mineral":"Gold","locations":[{"location":"Abyssal Depths","chance_percent":48.4694},{"location":"Azuralite Oasis","chance_percent":36.9787},{"location":"Crystal Cavern River","chance_percent":42.3118},{"location":"Deeproot Spring","chance_percent":45.184},{"location":"Fortune River","chance_percent":57.3939},{"location":"Fortune River Delta","chance_percent":54.716},{"location":"Fungal Marsh","chance_percent":54.2473},{"location":"Overgrown Grotto","chance_percent":46.6816},{"location":"Rubble Creek Deposits","chance_percent":61.7742},{"location":"Rubble Creek Sands","chance_percent":65.8413},{"location":"The Magma Furnace","chance_percent":33.4613},{"location":"Volcanic Sands","chance_percent":34.1459},{"location":"Rotwood Swamp","chance_percent":54.2473},{"location":"Haunted Creek","chance_percent":43.23},{"location":"The Void (if in loot pool)","chance_percent":18.1132}],"rarity":"comun"},{"mineral":"Golden Pearl","locations":[{"location":"Fortune River Delta","chance_percent":0.01641479},{"location":"Sunset Beach","chance_percent":0.02266587}],"rarity":"epico"},{"mineral":"Inferlume","locations":[{"location":"Azuralite Oasis","chance_percent":7.4e-06},{"location":"Crystal Cavern River","chance_percent":6.77e-06},{"location":"Infernal Heart","chance_percent":1.105e-05},{"location":"Sunset Beach","chance_percent":8.5e-06},{"location":"Volcanic Sands","chance_percent":7.81e-06},{"location":"Windswept Beach","chance_percent":9.04e-06}],"rarity":"mitico"},{"mineral":"Iridium","locations":[{"location":"Fortune River","chance_percent":0.00860909},{"location":"Fortune River Delta","chance_percent":0.0054716},{"location":"Frostbite River","chance_percent":0.012874},{"location":"Frostbite Waterfall","chance_percent":0.012874},{"location":"Frozen Peak","chance_percent":0.012874},{"location":"Rubble Creek Deposits","chance_percent":0.01853227},{"location":"Rubble Creek Sands","chance_percent":0.01316826}],"rarity":"epico"},{"mineral":"Jade","locations":[{"location":"Fortune River","chance_percent":0.28696962},{"location":"Fortune River Delta","chance_percent":0.21886385},{"location":"Frostbite River","chance_percent":1.287424},{"location":"Frostbite Waterfall","chance_percent":1.287402},{"location":"Frozen Peak","chance_percent":1.287401}],"rarity":"raro"},{"mineral":"Lapis Lazuli","locations":[{"location":"Abyssal Depths","chance_percent":0.00022},{"location":"Fortune River","chance_percent":0.10330906},{"location":"Frostbite River","chance_percent":0.06437},{"location":"Frostbite Waterfall","chance_percent":0.06437},{"location":"Frozen Peak","chance_percent":0.064371},{"location":"Haunted Creek","chance_percent":0.043},{"location":"Rubble Creek Deposits","chance_percent":0.15443558},{"location":"Rubble Creek Sands","chance_percent":0.0877884}],"rarity":"raro"},{"mineral":"Lightshard","locations":[{"location":"Abyssal Depths","chance_percent":0.00048469},{"location":"Deeproot Spring","chance_percent":0.00045},{"location":"Haunted Creek","chance_percent":0.00087},{"location":"Overgrown Grotto","chance_percent":0.000467}],"rarity":"epico"},{"mineral":"Luminum","locations":[{"location":"Azuralite Oasis","chance_percent":0.00055468},{"location":"Crystal Caverns","chance_percent":0.00042312},{"location":"Deeproot Spring","chance_percent":0.0005},{"location":"Overgrown Grotto","chance_percent":0.00056},{"location":"Sunset Beach","chance_percent":0.00084997}],"rarity":"legendario"},{"mineral":"Malachite","locations":[{"location":"Abyssal Depths","chance_percent":0.09693871923},{"location":"Azuralite Oasis","chance_percent":0.09244674},{"location":"Crystal Cavern River","chance_percent":0.08462366},{"location":"Deeproot Spring","chance_percent":0.0904},{"location":"Fungal Marsh","chance_percent":0.5425},{"location":"Haunted Creek","chance_percent":0.086},{"location":"Overgrown Grotto","chance_percent":0.093347},{"location":"Windswept Beach","chance_percent":1.20539634},{"location":"Rotwood Swamp","chance_percent":0.5424},{"location":"The Void (if in loot pool)","chance_percent":1.8113}],"rarity":"poco_comun"},{"mineral":"Mercury","locations":[{"location":"Fungal Marsh","chance_percent":0.001085},{"location":"Rotwood Swamp","chance_percent":0.00108494},{"location":"The Void (if in loot pool)","chance_percent":0.003623}],"rarity":"epico"},{"mineral":"Meteoric Iron","locations":[{"location":"Fortune River","chance_percent":0.05739392},{"location":"Rubble Creek Deposits","chance_percent":0.07412908},{"location":"Rubble Creek Sands","chance_percent":0.03072594},{"location":"Volcanic Sands","chance_percent":2.23075226},{"location":"Windswept Beach","chance_percent":0.24107927}],"rarity":"raro"},{"mineral":"Mythril","locations":[{"location":"Frostbite River","chance_percent":2.6e-06},{"location":"Frostbite Waterfall","chance_percent":2.6e-06},{"location":"Frozen Peak","chance_percent":3.22e-06},{"location":"Fungal Marsh","chance_percent":3.797e-06},{"location":"Rotwood Swamp","chance_percent":3.797e-06},{"location":"The Void (if in loot pool)","chance_percent":2.536e-06}],"rarity":"mitico"},{"mineral":"Neodymium","locations":[{"location":"Abyssal Depths","chance_percent":0.0009},{"location":"Azuralite Oasis","chance_percent":1.38670116},{"location":"Crystal Cavern River","chance_percent":1.26935485},{"location":"Deeproot Spring","chance_percent":1.3553},{"location":"Fortune River Delta","chance_percent":1.64147886},{"location":"Overgrown Grotto","chance_percent":1.400199},{"location":"Sunset Beach","chance_percent":2.26658744}],"rarity":"poco_comun"},{"mineral":"Obsidian","locations":[{"location":"Infernal Heart","chance_percent":73.68221188},{"location":"The Magma Furnace","chance_percent":73.672696},{"location":"Volcanic Sands","chance_percent":44.61504519},{"location":"Windswept Beach","chance_percent":24.10792685}],"rarity":"comun"},{"mineral":"Onyx","locations":[{"location":"Azuralite Oasis","chance_percent":0.04622337},{"location":"Crystal Cavern River","chance_percent":0.04231183},{"location":"Fortune River Delta","chance_percent":0.05471596},{"location":"Fungal Marsh","chance_percent":0.1085},{"location":"Infernal Heart","chance_percent":0.14736442},{"location":"Sunset Beach","chance_percent":0.05666469},{"location":"The Magma Furnace","chance_percent":0.11381953},{"location":"Volcanic Sands","chance_percent":0.11153761},{"location":"Windswept Beach","chance_percent":0.12053963},{"location":"Rotwood Swamp","chance_percent":0.1084946934},{"location":"The Void (if in loot pool)","chance_percent":0.09057}],"rarity":"raro"},{"mineral":"Osmium","locations":[{"location":"Azuralite Oasis","chance_percent":0.0013867},{"location":"Crystal Cavern River","chance_percent":0.00126935},{"location":"Fortune River","chance_percent":0.00143485},{"location":"Fungal Marsh","chance_percent":0.002712},{"location":"Infernal Heart","chance_percent":0.00221047},{"location":"Rubble Creek Deposits","chance_percent":0.00123548},{"location":"The Magma Furnace","chance_percent":0.00170729},{"location":"Volcanic Sands","chance_percent":0.00167306},{"location":"Windswept Beach","chance_percent":0.00180809},{"location":"Rotwood Swamp","chance_percent":0.002712367335},{"location":"The Void (if in loot pool)","chance_percent":0.003623}],"rarity":"epico"},{"mineral":"Painite","locations":[{"location":"Abyssal Depths","chance_percent":2.908e-06},{"location":"Fortune River","chance_percent":1.722e-05},{"location":"Fortune River Delta","chance_percent":2.189e-05},{"location":"Haunted Creek","chance_percent":3.5e-06},{"location":"Infernal Heart","chance_percent":2.21e-05},{"location":"Sunset Beach","chance_percent":2.267e-05}],"rarity":"mitico"},{"mineral":"Palladium","locations":[{"location":"Azuralite Oasis","chance_percent":9.245e-05},{"location":"Crystal Cavern River","chance_percent":8.462e-05},{"location":"Fortune River","chance_percent":2.296e-05},{"location":"Fortune River Delta","chance_percent":8.207e-05},{"location":"Frostbite River","chance_percent":0.00025751}],"rarity":"legendario"},{"mineral":"Pearl","locations":[{"location":"Fortune River Delta","chance_percent":10.94319238},{"location":"Sunset Beach","chance_percent":16.99940576},{"location":"Windswept Beach","chance_percent":18.08094514}],"rarity":"comun"},{"mineral":"Peridot","locations":[{"location":"Infernal Heart","chance_percent":0.07368221},{"location":"The Magma Furnace","chance_percent":0.05690976},{"location":"Volcanic Sands","chance_percent":0.05576881},{"location":"Windswept Beach","chance_percent":0.06026982}],"rarity":"raro"},{"mineral":"Pink Diamond","locations":[{"location":"Fortune River","chance_percent":2.87e-05},{"location":"Fortune River Delta","chance_percent":4.377e-05},{"location":"Rubble Creek Deposits","chance_percent":2.471e-05},{"location":"Rubble Creek Sands","chance_percent":1.756e-05},{"location":"Volcanic Sands","chance_percent":2.231e-05}],"rarity":"mitico"},{"mineral":"Platinum","locations":[{"location":"Fortune River","chance_percent":28.6969622},{"location":"Rubble Creek Deposits","chance_percent":30.88711692},{"location":"Rubble Creek Sands","chance_percent":13.16825954}],"rarity":"comun"},{"mineral":"Prismara","locations":[{"location":"Azuralite Oasis","chance_percent":2.77e-06},{"location":"Overgrown Grotto","chance_percent":2.800896729e-06}],"rarity":"mitico"},{"mineral":"Pumpkin Soul","locations":[{"location":"Haunted Creek","chance_percent":4.3e-07}],"rarity":"exotico"},{"mineral":"Pyrelith","locations":[{"location":"Infernal Heart","chance_percent":0.29472885},{"location":"The Magma Furnace","chance_percent":0.22763906}],"rarity":"raro"},{"mineral":"Pyrite","locations":[{"location":"Rubble Creek Sands","chance_percent":13.16825956}],"rarity":"comun"},{"mineral":"Radiant Gold","locations":[{"location":"Abyssal Depths","chance_percent":1.5e-06},{"location":"Deeproot Spring","chance_percent":9e-06},{"location":"Haunted Creek","chance_percent":1.3e-06}],"rarity":"mitico"},{"mineral":"Red Beryl","locations":[{"location":"Fungal Marsh","chance_percent":8.137e-07}],"rarity":"mitico"},{"mineral":"Rose Gold","locations":[{"location":"Fortune River","chance_percent":0.00057394},{"location":"Infernal Heart","chance_percent":0.00044209},{"location":"Rubble Creek Deposits","chance_percent":0.00061774},{"location":"Rubble Creek Sands","chance_percent":0.00043894},{"location":"The Magma Furnace","chance_percent":0.00142274},{"location":"Volcanic Sands","chance_percent":0.00139422},{"location":"Windswept Beach","chance_percent":0.00150675}],"rarity":"legendario"},{"mineral":"Ruby","locations":[{"location":"Fortune River","chance_percent":0.2295757},{"location":"Rubble Creek Deposits","chance_percent":0.24709694},{"location":"Rubble Creek Sands","chance_percent":0.21947099}],"rarity":"raro"},{"mineral":"Sapphire","locations":[{"location":"Fortune River","chance_percent":0.57393924},{"location":"Frostbite River","chance_percent":1.931103},{"location":"Frostbite Waterfall","chance_percent":1.931102},{"location":"Frozen Peak","chance_percent":1.931136},{"location":"Rubble Creek Deposits","chance_percent":0.61774234}],"rarity":"poco_comun"},{"mineral":"Seashell","locations":[{"location":"Sunset Beach","chance_percent":48.2158537},{"location":"Windswept Beach","chance_percent":45.3317487}],"rarity":"comun"},{"mineral":"Silver","locations":[{"location":"Abyssal Depths","chance_percent":0.034},{"location":"Azuralite Oasis","chance_percent":16.9247313},{"location":"Crystal Cavern River","chance_percent":18.48934883},{"location":"Deeproot Spring","chance_percent":22.5883},{"location":"Fortune River Delta","chance_percent":27.35798096},{"location":"Frostbite River","chance_percent":32.185042},{"location":"Frostbite Waterfall","chance_percent":32.185037},{"location":"Frozen Peak","chance_percent":32.185593},{"location":"Haunted Creek","chance_percent":21.62},{"location":"Overgrown Grotto","chance_percent":23.33665},{"location":"Sunset Beach","chance_percent":13.16825956}],"rarity":"comun"},{"mineral":"Silver Clamshell","locations":[{"location":"Fortune River Delta","chance_percent":0.10943192},{"location":"Sunset Beach","chance_percent":0.16999406},{"location":"Windswept Beach","chance_percent":0.18080945}],"rarity":"raro"},{"mineral":"Smoky Quartz","locations":[{"location":"Abyssal Depths","chance_percent":0.9693871923},{"location":"Azuralite Oasis","chance_percent":0.92446744},{"location":"Crystal Cavern River","chance_percent":0.84623657},{"location":"Deeproot Spring","chance_percent":0.9035},{"location":"Fortune River Delta","chance_percent":1.09431924},{"location":"Fungal Marsh","chance_percent":4.3398},{"location":"Haunted Creek","chance_percent":3.46},{"location":"Overgrown Grotto","chance_percent":0.933466},{"location":"Sunset Beach","chance_percent":1.13329372},{"location":"Rotwood Swamp","chance_percent":4.3397},{"location":"The Void (if in loot pool)","chance_percent":1.8113}],"rarity":"poco_comun"},{"mineral":"Specterite","locations":[{"location":"Abyssal Depths","chance_percent":0.000145},{"location":"Deeproot Spring","chance_percent":0.00014},{"location":"Haunted Creek","chance_percent":0.00022},{"location":"Overgrown Grotto","chance_percent":0.00014},{"location":"Rotwood Swamp","chance_percent":0.00027},{"location":"The Void (if in loot pool)","chance_percent":0.0001811}],"rarity":"legendario"},{"mineral":"Star Garnet","locations":[{"location":"Fungal Marsh","chance_percent":1.356e-06},{"location":"Rotwood Swamp","chance_percent":1.084e-06},{"location":"The Void (if in loot pool)","chance_percent":2.536e-06}],"rarity":"mitico"},{"mineral":"Starshine","locations":[{"location":"Abyssal Depths","chance_percent":4.85e-05},{"location":"Azuralite Oasis","chance_percent":9.245e-05},{"location":"Crystal Cavern River","chance_percent":8.462e-05},{"location":"Deeproot Spring","chance_percent":5e-05},{"location":"Overgrown Grotto","chance_percent":4.7e-05}],"rarity":"legendario"},{"mineral":"Titanium","locations":[{"location":"Abyssal Depths","chance_percent":0.017},{"location":"Fortune River","chance_percent":11.47878488},{"location":"Frostbite River","chance_percent":12.874017},{"location":"Frostbite Waterfall","chance_percent":12.874015},{"location":"Frozen Peak","chance_percent":12.874237},{"location":"Fungal Marsh","chance_percent":10.8495},{"location":"Haunted Creek","chance_percent":8.65},{"location":"Rubble Creek Deposits","chance_percent":4.94193871},{"location":"Rubble Creek Sands","chance_percent":2.19470992},{"location":"Rotwood Swamp","chance_percent":10.8494},{"location":"The Void (if in loot pool)","chance_percent":1.8113}],"rarity":"poco_comun"},{"mineral":"Topaz","locations":[{"location":"Fortune River","chance_percent":1.43484811},{"location":"Fortune River Delta","chance_percent":0.54715962},{"location":"Infernal Heart","chance_percent":2.21046636},{"location":"Rubble Creek Deposits","chance_percent":1.23548468},{"location":"Rubble Creek Sands","chance_percent":1.09735496},{"location":"The Magma Furnace","chance_percent":1.70729294},{"location":"Volcanic Sands","chance_percent":1.67306419},{"location":"Windswept Beach","chance_percent":1.80809451}],"rarity":"poco_comun"},{"mineral":"Tourmaline","locations":[{"location":"Frostbite River","chance_percent":0.0001602},{"location":"Frostbite Waterfall","chance_percent":0.0001609},{"location":"Frozen Peak","chance_percent":3.2186e-05}],"rarity":"legendario"},{"mineral":"Umbrite","locations":[{"location":"Abyssal Depths","chance_percent":1.21e-07}],"rarity":"exotico"},{"mineral":"Uranium","locations":[{"location":"Azuralite Oasis","chance_percent":0.00023112},{"location":"Fortune River","chance_percent":0.00017218},{"location":"Fortune River Delta","chance_percent":0.00027358},{"location":"Infernal Heart","chance_percent":0.00044209}],"rarity":"legendario"},{"mineral":"Vineheart","locations":[{"location":"Deeproot Spring","chance_percent":1.35e-07}],"rarity":"exotico"},{"mineral":"Voidstone","locations":[{"location":"The Void","chance_percent":7.245e-07}],"rarity":"exotico"},{"mineral":"Volcanic Core","locations":[{"location":"Infernal Heart","chance_percent":3.68e-06},{"location":"The Magma Furnace","chance_percent":2.85e-06}],"rarity":"mitico"},{"mineral":"Volcanic Key","locations":[{"location":"Infernal Heart","chance_percent":0.00147364},{"location":"The Magma Furnace","chance_percent":0.000854}],"rarity":"legendario"},{"mineral":"Vortessence","locations":[{"location":"Azuralite Oasis","chance_percent":7.4e-06},{"location":"Crystal Cavern River","chance_percent":6.77e-06},{"location":"Fortune River Delta","chance_percent":8.21e-06},{"location":"Frostbite River","chance_percent":1.6737e-05},{"location":"Frostbite Waterfall","chance_percent":1.6737e-05},{"location":"Haunted Creek","chance_percent":2.2e-06},{"location":"Windswept Beach","chance_percent":9.04e-06}],"rarity":"mitico"},{"mineral":"Zircon","locations":[{"location":"Infernal Heart","chance_percent":1.47364424},{"location":"The Magma Furnace","chance_percent":1.13819529},{"location":"Volcanic Sands","chance_percent":1.11537613}],"rarity":"poco_comun"},{"mineral":"Bloodstone","locations":[{"location":"Rotwood Swamp","chance_percent":6.509681604e-08}],"rarity":"exotico"},{"mineral":"Lost Soul","rarity":"legendario","locations":[{"location":"Haunted Creek","chance_percent":0.00043},{"location":"The Void (if in loot pool)","chance_percent":0.0001811}]},{"mineral":"Opal","rarity":"epico","locations":[{"location":"Fortune River","chance_percent":0.00229576},{"location":"Sunset Beach","chance_percent":0.00226659},{"location":"Infernal Heart","chance_percent":0.00221047},{"location":"Rubble Creek Deposits","chance_percent":0.00185323},{"location":"Windswept Beach","chance_percent":0.00180809},{"location":"The Magma Furnace","chance_percent":0.00170729},{"location":"Volcanic Sands","chance_percent":0.00167306},{"location":"Rubble Creek Sands","chance_percent":0.00087788},{"location":"The Void (if in loot pool)","chance_percent":0.003623}]},{"mineral":"Pyronium","rarity":"epico","locations":[{"location":"Infernal Heart","chance_percent":0.00442093},{"location":"The Magma Furnace","chance_percent":0.00341459},{"location":"Volcanic Sands","chance_percent":0.00334613},{"location":"The Void (if in loot pool)","chance_percent":0.003623}]},{"mineral":"Moonstone","rarity":"epico","locations":[{"location":"Sunset Beach","chance_percent":0.00566647},{"location":"Fortune River Delta","chance_percent":0.0054716},{"location":"The Void (if in loot pool)","chance_percent":0.003623}]},{"mineral":"Rock Candy","rarity":"poco_comun","locations":[{"location":"Haunted Creek","chance_percent":1.3},{"location":"The Void (if in loot pool)","chance_percent":1.8113}]}]}</script>
+<script id="colors" type="application/json">{
+  "comun":{"label":"Común","color":"#9aa0a6"},
+  "poco_comun":{"label":"Poco común","color":"#34a853"},
+  "raro":{"label":"Raro","color":"#4285f4"},
+  "epico":{"label":"Épico","color":"#a142f4"},
+  "legendario":{"label":"Legendario","color":"#fbbc04"},
+  "mitico":{"label":"Mítico","gradient":"linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)"},
+  "exotico":{"label":"Exótico","color":"#ea4335"}
+}</script>
+<script id="locColors" type="application/json">{
+  "Abyssal Depths": "#7A46C8",
+  "Azuralite Oasis": "#1aa7ff",
+  "Crystal Cavern River": "#2e7df7",
+  "Crystal Caverns": "#1aa7ff",
+  "Deeproot Spring": "#b7ca00",
+  "Fortune River": "#f1c232",
+  "Fortune River Delta": "#00bcd4",
+  "Frostbite River": "#56a8ff",
+  "Frostbite Waterfall": "#20c4e6",
+  "Frozen Peak": "#6a3cff",
+  "Infernal Heart": "#a31717",
+  "Overgrown Grotto": "#1db14a",
+  "Rubble Creek Deposits": "#9b7b5f",
+  "Rubble Creek Sands": "#caa062",
+  "Sunset Beach": "#f39c12",
+  "The Magma Furnace": "#d32f2f",
+  "The Void": "#bfbfbf",
+  "Volcanic Sands": "#ff7a00",
+  "Windswept Beach": "#eb7d34",
+  "Haunted Creek": "#D26A3A",
+  "Rotwood Swamp": "#5CA66A",
+  "Fungal Marsh": "#4AA4A2"
+}</script>
+<script>
+/* -------- CONFIG: point this at your wiki JSON page -------- */
+const WIKI_JSON_URL =
+  "https://prospectingwiki.org/w/index.php?title=Project:Data/minerals.json&action=raw&ctype=application/json&origin=*";
+/* ----------------------------------------------------------- */
+
+function q(s){ return document.querySelector(s); }
+function setTheme(mode){ document.documentElement.setAttribute('data-theme', mode); localStorage.setItem('dropsTheme', mode); q('#themeLabel').textContent = (mode==='dark'?'Dark':'Light'); }
+function toggleTheme(){ const cur = document.documentElement.getAttribute('data-theme') || 'light'; setTheme(cur==='light'?'dark':'light'); }
+function rollsPerAttempt(luck, cap){ return (luck*0.65*Math.sqrt(Math.max(0,cap)))||0; }
+function P_attempt_from_p(p, rolls){ return 1 - Math.pow(1 - p, rolls); }
+function N_attempts_for(P_attempt, target){ if (!(P_attempt>0) || !(target>0 && target<1)) return NaN; return Math.log(1-target)/Math.log(1-P_attempt); }
+function fmtPct(x){ return (x*100).toFixed(12) + "%"; }
+function fmtNum(x){ return Number.isFinite(x) ? x.toFixed(2) : "—"; }
+
+const raritySpec = JSON.parse(document.getElementById('colors').textContent);
+const locSpec = JSON.parse(document.getElementById('locColors').textContent);
+
+let dataset = null;
+let allMinerals = [];
+let filtered = [];
+let selectedIdx = 0;
+let ADVANCED = false;
+
+/* ---------- wiki loader with fallback ---------- */
+async function loadDatasetFromWiki(){
+  try{
+    const res = await fetch(WIKI_JSON_URL, { mode: "cors", cache: "no-cache" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const json = await res.json();
+    if (!json || !Array.isArray(json.minerals)) throw new Error("Bad JSON shape");
+    return json;
+  }catch(e){
+    console.warn("Wiki fetch failed, using embedded data.", e);
+    return JSON.parse(document.getElementById('data').textContent);
+  }
+}
+/* ---------------------------------------------- */
+
+// Color rarity filter options
+(function colorRarityOptions(){
+  const sel = q("#rarityFilter");
+  const map = { comun:"Common", poco_comun:"Uncommon", raro:"Rare", epico:"Epic", legendario:"Legendary", mitico:"Mythic", exotico:"Exotic" };
+  for (let i=0;i<sel.options.length;i++){
+    const opt = sel.options[i];
+    const val = opt.value;
+    if (!val || !(val in raritySpec)) continue;
+    const spec = raritySpec[val];
+    if (spec.color){ opt.style.color = spec.color; }
+    else if (spec.gradient){ opt.style.color = "#ff00ff"; }
+    opt.textContent = map[val];
+  }
+})();
+
+function rarityLabel(r){ const t = {comun:"Common", poco_comun:"Uncommon", raro:"Rare", epico:"Epic", legendario:"Legendary", mitico:"Mythic", exotico:"Exotic"}; return t[r] || "—"; }
+function applyDot(el, rarity){ const spec = raritySpec[rarity] || {}; el.style.background = "transparent"; if (spec.gradient){ el.style.background = spec.gradient; } if (spec.color){ el.style.background = spec.color; } }
+function applyBadge(el, rarity){ const spec = raritySpec[rarity] || {}; el.style.background = ""; el.style.color = ""; if (spec.gradient){ el.style.background = spec.gradient; el.style.color = "#111"; } if (spec.color){ el.style.background = spec.color; el.style.color = "#111"; } }
+function colorizeRow(tr, rarity){ const spec = raritySpec[rarity] || {}; tr.classList.add("borderLeft"); if (spec.gradient){ tr.style.borderLeftColor = "#111"; } if (spec.color){ tr.style.borderLeftColor = spec.color; } }
+function colorizeLocationText(el, name){ const c = locSpec[name]; if (c){ el.style.color = c; } }
+
+// Custom Select (minerals)
+const selectBtn = q("#selectBtn");
+const selectList = q("#selectList");
+const selectWrap = q("#selectWrap");
+const selText = q("#selText");
+const selDot = q("#selDot");
+
+function buildOptions(list){
+  selectList.innerHTML = "";
+  list.forEach((m, idx)=>{
+    const div = document.createElement('div');
+    div.className = "option"; div.id = "opt-"+idx; div.setAttribute("role", "option"); div.dataset.idx = idx;
+    const dot = document.createElement('span'); dot.className = "dot"; applyDot(dot, m.rarity||"");
+    const txt = document.createElement('span'); txt.className = "opt-text"; if ((m.rarity||"") === "mitico"){ txt.classList.add("gradient-text"); } txt.textContent = m.mineral;
+    div.append(dot, txt);
+    div.addEventListener('click', ()=>{ selectedIdx = idx; updateSelection(); selectWrap.classList.remove('open'); });
+    selectList.appendChild(div);
+  });
+}
+
+function rarityTag(r){
+  switch(r){
+    case "legendario": return "[L]";
+    case "epico": return "[E]";
+    case "raro": return "[R]";
+    case "poco_comun": return "[U]";
+    case "mitico": return "[M]";
+    case "exotico": return "[X]";
+    default: return "[C]";
+  }
+}
+
+function updateSelection(){
+  const m = filtered[selectedIdx] || {mineral:"—", rarity:""};
+  const tag = rarityTag(m.rarity||"");
+  selText.textContent = m.mineral ? (tag + " " + m.mineral) : "—";
+  applyDot(selDot, m.rarity||"");
+  render();
+}
+
+selectBtn.addEventListener('click', ()=>{
+  const isOpen = selectWrap.classList.toggle('open'); selectBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  if (isOpen){ selectList.focus(); }
+});
+document.addEventListener('click', (e)=>{ if (!selectWrap.contains(e.target)) selectWrap.classList.remove('open'); });
+selectList.addEventListener('keydown', (e)=>{
+  if (e.key === 'Escape'){ selectWrap.classList.remove('open'); return; }
+  if (e.key === 'ArrowDown'){ selectedIdx = Math.min(selectedIdx+1, filtered.length-1); updateSelection(); ensureVisible(); e.preventDefault(); }
+  if (e.key === 'ArrowUp'){ selectedIdx = Math.max(selectedIdx-1, 0); updateSelection(); ensureVisible(); e.preventDefault(); }
+  if (e.key === 'Enter'){ selectWrap.classList.remove('open'); }
+});
+function ensureVisible(){
+  const cur = q("#opt-"+selectedIdx); if (!cur) return;
+  const top = cur.offsetTop; const bottom = top + cur.offsetHeight;
+  if (top < selectList.scrollTop) selectList.scrollTop = top;
+  else if (bottom > selectList.scrollTop + selectList.clientHeight) selectList.scrollTop = bottom - selectList.clientHeight;
+}
+
+// Search + rarity + location filters
+function applySearchAndFilter(){
+  const qv = q("#search").value.trim().toLowerCase();
+  const rf = q("#rarityFilter").value;
+  const lf = q("#locationFilter").value;
+  filtered = allMinerals.filter(m => {
+    const okName = !qv || (m.mineral||"").toLowerCase().includes(qv);
+    const okRarity = !rf || (m.rarity||"") === rf;
+    const okLoc = !lf || (m.locations||[]).some(r => (r.location||"") === lf);
+    return okName && okRarity && okLoc;
+  });
+  if (filtered.length === 0){ filtered = [{mineral:"(no results)", locations:[], rarity:""}]; }
+  selectedIdx = 0;
+  buildOptions(filtered);
+  updateSelection();
+}
+
+// Table render (auto-sort by per-attempt best)
+function findBest(rows, rolls){
+  let best = {idx:-1, value:-1};
+  rows.forEach((row,i)=>{ const p=(row.chance_percent||0)/100; const val=P_attempt_from_p(p, rolls); if (val>best.value){ best={idx:i,value:val,name:row.location}; } });
+  return best;
+}
+
+function fmtInt(n){ return (Math.round(n)).toLocaleString(); }
+function oneIn(p){
+  if (!(p>0)) return "—";
+  const inv = Math.round(1/p);
+  if (!Number.isFinite(inv) || inv<=0) return "—";
+  return `~1 in ${fmtInt(inv)}`;
+}
+
+function render(){
+  const luck = parseFloat(q("#luck").value)||0;
+  const cap = parseFloat(q("#capacity").value)||0;
+  const rolls = rollsPerAttempt(luck, cap);
+  q("#pulls").textContent = "Rolls per attempt: " + (Number.isFinite(rolls) ? rolls.toFixed(1) : "—");
+  const statsSummary = q("#statsSummary"); if (statsSummary){ statsSummary.textContent = "Luck: " + luck + " · Capacity: " + cap; }
+
+  const m = filtered[selectedIdx] || {mineral:"—", locations:[], rarity:""};
+  q("#mineralName").textContent = m.mineral || "—";
+  const badge = q("#rarityBadge"); badge.textContent = rarityLabel(m.rarity||""); applyBadge(badge, m.rarity||"");
+
+  const tbody = q("#tbody"); tbody.innerHTML = "";
+  const rows = (m.locations||[]).slice();
+  rows.sort((a,b)=>{ const pa=(a.chance_percent||0)/100, pb=(b.chance_percent||0)/100; return P_attempt_from_p(pb, rolls)-P_attempt_from_p(pa, rolls); });
+
+  const best = findBest(rows, rolls);
+  q("#bestBadge").textContent = "Best location: " + (best.idx>=0 ? (rows[best.idx].location + " (" + (ADVANCED ? fmtPct(best.value) : oneIn(best.value)) + ")") : "—");
+
+  rows.forEach((row,i)=>{
+    const p=(row.chance_percent||0)/100;
+    const P_attempt = P_attempt_from_p(p, rolls);
+    const n50 = N_attempts_for(P_attempt, 0.5);
+    const n90 = N_attempts_for(P_attempt, 0.9);
+    const tr=document.createElement('tr');
+    if (i===best.idx) tr.classList.add("best");
+    colorizeRow(tr, m.rarity||"");
+    const tdA=document.createElement('td'); tdA.textContent=(i===best.idx?"★ ":"")+row.location; colorizeLocationText(tdA,row.location);
+    const tdB=document.createElement('td'); tdB.className="right mono"; let basePctStr = oneIn(p); if (ADVANCED){ basePctStr = (row.chance_percent||0).toFixed(12)+"%"; } tdB.textContent=basePctStr;
+    const tdC=document.createElement('td'); tdC.className="right mono"; let pattemptStr = oneIn(P_attempt); if (ADVANCED){ pattemptStr = fmtPct(P_attempt); } tdC.textContent = pattemptStr;
+    const tdE=document.createElement('td'); tdE.className="right mono"; tdE.textContent=fmtNum(n50);
+    const tdF=document.createElement('td'); tdF.className="right mono"; tdF.textContent=fmtNum(n90);
+    tr.append(tdA,tdB,tdC,tdE,tdF); tbody.appendChild(tr);
+  });
+}
+
+// Color options in location filter
+function colorLocationOptions(){
+  const sel = document.getElementById('locationFilter');
+  for (let i=0;i<sel.options.length;i++){
+    const opt = sel.options[i], val = opt.value;
+    if (!val) continue;
+    const c = locSpec[val]; if (c) opt.style.color = c;
+  }
+}
+
+// Advanced mode
+document.addEventListener('DOMContentLoaded', async () => {
+  const advBtn = document.getElementById('advChip');
+  const advHint = document.getElementById('advHint');
+  function updateAdvancedUI(){
+    if (!advBtn || !advHint) return;
+    if (ADVANCED){
+      advBtn.textContent = "Advanced ✓";
+      advHint.textContent = "Advanced: showing detailed % values";
+    }else{
+      advBtn.textContent = "Advanced";
+      advHint.textContent = "Normal: showing ~1 in X (click for %)";
+    }
+  }
+  advBtn.addEventListener('click', () => {
+    ADVANCED = !ADVANCED;
+    updateAdvancedUI();
+    render();
+  });
+  updateAdvancedUI();
+
+  const savedTheme = localStorage.getItem('dropsTheme') || 'light'; setTheme(savedTheme);
+  document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+
+  // Load data (wiki first, fallback to embedded)
+  dataset = await loadDatasetFromWiki();
+  allMinerals = (dataset.minerals||[]).filter(m => (m.locations||[]).length>0).sort((a,b)=>a.mineral.localeCompare(b.mineral));
+
+  colorLocationOptions();
+  applySearchAndFilter();
+
+  document.getElementById('luck').addEventListener('input', render);
+  document.getElementById('capacity').addEventListener('input', render);
+  document.getElementById('search').addEventListener('input', applySearchAndFilter);
+  document.getElementById('rarityFilter').addEventListener('input', applySearchAndFilter);
+  document.getElementById('locationFilter').addEventListener('input', applySearchAndFilter);
+});
+</script>
+</body></html>
